@@ -1,9 +1,5 @@
 from operator import indexOf
-from matplotlib.cbook import index_of
-import numpy as np
-import matplotlib.pyplot as plot
 import pandas as pd
-import seaborn as sns
 import math
 from pprint import pprint
 
@@ -81,9 +77,7 @@ pred_rain = (present_rain + sel_rain_mean) / 2
 actual_data = data_21[(data_21["Month"] == 6) & (data_21["Day"] == 15)]
 actual_values = actual_data[["Max Temp (°C)", "Min Temp (°C)", "Total Rain (mm)"]].to_numpy().flatten()
 
-print(actual_values)
-
 print("Prediction for June 15th, 2021 \n-----------------------------")
 print("\tMax Temp |", "Min Temp |", "Rainfall")
 print(f"Actual:   {actual_values[0]}   |   {actual_values[1]}   |   {actual_values[2]}")
-print(f"Predicted: {pred_max}   |   {pred_min}   |   {pred_rain}")
+print(f"Predicted: {round(pred_max, 2)} |   {round(pred_min,2)}  |   {round(pred_rain, 2)}")

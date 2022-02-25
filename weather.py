@@ -118,15 +118,15 @@ def forecast_day(day):
             prev_precip += values[7]
             prev_snow_grnd += values[8]
 
-        prev_max = prev_max
-        prev_min = prev_min
-        prev_mean = prev_mean
-        prev_head_days = prev_head_days
-        prev_cool_days = prev_cool_days
-        prev_rain = prev_rain
-        prev_snow = prev_snow
-        prev_precip = prev_precip
-        prev_snow_grnd = prev_snow_grnd
+        prev_max = prev_max / 7
+        prev_min = prev_min / 7
+        prev_mean = prev_mean / 7
+        prev_head_days = prev_head_days / 7
+        prev_cool_days = prev_cool_days / 7
+        prev_rain = prev_rain / 7
+        prev_snow = prev_snow / 7
+        prev_precip = prev_precip / 7
+        prev_snow_grnd = prev_snow_grnd / 7
 
         euclid_distance = math.sqrt(
             (present_max - prev_max)**2 +

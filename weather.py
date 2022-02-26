@@ -10,16 +10,16 @@ data_20 = pd.read_csv("2020_data.csv")
 data_21 = pd.read_csv("2021_data.csv")
 
 PARAMS = [
-        "Max Temp (°C)",
-        "Min Temp (°C)",
-        "Mean Temp (°C)",
-        "Heat Deg Days (°C)",
-        "Cool Deg Days (°C)",
-        "Total Rain (mm)",
-        "Total Snow (cm)",
-        "Total Precip (mm)",
-        "Snow on Grnd (cm)",
-    ]
+    "Max Temp (°C)",
+    "Min Temp (°C)",
+    "Mean Temp (°C)",
+    "Heat Deg Days (°C)",
+    "Cool Deg Days (°C)",
+    "Total Rain (mm)",
+    "Total Snow (cm)",
+    "Total Precip (mm)",
+    "Snow on Grnd (cm)",
+]
 
 NUM_OF_PARAMS = len(PARAMS)
 
@@ -51,7 +51,7 @@ def forecast_day(day):
 
     for line in CD:
         for i in range(len(line)):
-            present_means[i] += line[i] if not math.isnan(line[i]) else 0
+            if not math.isnan(line[i]): present_means[i] += line[i] 
 
     present_means = get_mean(present_means)
 
@@ -60,7 +60,7 @@ def forecast_day(day):
         prev_means = [0] * NUM_OF_PARAMS
         for values in w_dct[line]:
             for i in range(len(prev_means)):
-                prev_means += values[i]
+                prev_means[i] += values[i]
 
         prev_means = get_mean(prev_means)
 
@@ -82,21 +82,10 @@ def forecast_day(day):
     pred_arr = [(present_means[i] + sel_means[i]) / 2 for i in range(len(sel_means))]
 
     actual_data = data_21.loc[day]
-    # actual_data = data_21[(data_21["Month"] == 6) & (data_21["Day"] == 15)]
     actual_data = actual_data.fillna(0)
     actual_values = actual_data[PARAMS].to_numpy().flatten()
 
-    # print("Prediction for June 15th, 2021 \n-----------------------------")
-
-    # print(" \t\t\t\t Actual | Predicted")
-    # for i in range(len(title_arr)):
-    #     print(f"{title_arr[i]}           \t|  {actual_values[i]} | {round(pred_arr[i], 2)}")
-    # print(f"Actual:   {actual_values[0]}   |   {actual_values[1]}   |   {actual_values[2]}")
-    # print(f"Predicted: {round(pred_max, 2)} |   {round(pred_min,2)}  |   {round(pred_rain, 2)}")
-
-    # print(f"\nTotal time: {time.time() - t0}")
     return actual_values, pred_arr
-
 
 if __name__ == "__main__":
     t0 = time.time()
@@ -115,7 +104,6 @@ if __name__ == "__main__":
 
     actual_max_lst = []
     pred_max_lst = []
-    min
     for line in actual_list:
         actual_max_lst.append(line[0])
     for line in pred_list:
@@ -123,7 +111,3 @@ if __name__ == "__main__":
     plt.plot(x, actual_max_lst, label='Actual', color = "red")
     plt.plot(x, pred_max_lst, label='Prediction', color = "blue")
     plt.show()
-    # # pprint(pred_list)
-    # # pprint(data_20.loc[0,"Total Rain (mm)"])
-    
-    # # forecast_day(168)

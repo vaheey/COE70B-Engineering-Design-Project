@@ -132,7 +132,7 @@ if __name__ == "__main__":
     plt.gcf().set_size_inches(20,12)
 
     index = 0
-    for param in PARAMS[0:5]:
+    for param in PARAMS:
         plt.subplot(2, 5, index+1)
         plt.plot(day_range, actual_data[index], label='Actual', color = "red")
         plt.plot(day_range, pred_data[index], label='Prediction', color = "blue")
@@ -140,14 +140,4 @@ if __name__ == "__main__":
         plt.title(f"{param}")
         plt.legend(['Actual', 'Prediction'])
         index += 1
-
-    for param in PARAMS[5:len(PARAMS)]:
-        plt.subplot(2, 5, index+1)
-        plt.plot(day_range, actual_data[index], label='Actual', color = "red")
-        plt.plot(day_range, pred_data[index], label='Prediction', color = "blue")
-        plt.ylim(-20, 40)
-        plt.title(f"{param}")
-        plt.legend(['Actual', 'Prediction'])
-        index += 1
-
     plt.show()

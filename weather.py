@@ -121,15 +121,33 @@ if __name__ == "__main__":
             pred_list.append([0] * NUM_OF_PARAMS)
     print(f"\nTotal time: {time.time() - t0}")
 
-    actual_max_lst = []
-    pred_max_lst = []
-    for line in actual_list:
-        actual_max_lst.append(line[0])
-    for line in pred_list:
-        pred_max_lst.append(line[0])
+    actual_data = []
+    pred_data = []
 
-    plt.plot(day_range, actual_max_lst, label='Actual', color = "red")
-    plt.plot(day_range, pred_max_lst, label='Prediction', color = "blue")
-    plt.title("Max Temp (°C) - Actual vs Prediction")
-    plt.legend(['Actual', 'Prediction'])
+    actual_data = np.transpose(actual_list)
+    pred_data = np.transpose(pred_list)
+
+    plt.figure()
+    plt.subplot(1, 3, 1)
+    plt.gcf().set_size_inches(20,12)
+
+    index = 0
+    for param in PARAMS[0:5]:
+        plt.subplot(2, 5, index+1)
+        plt.plot(day_range, actual_data[index], label='Actual', color = "red")
+        plt.plot(day_range, pred_data[index], label='Prediction', color = "blue")
+        plt.ylim(-20, 40)
+        plt.title(f"{param}")
+        plt.legend(['Actual', 'Prediction'])
+        index += 1
+
+    for param in PARAMS[5:len(PARAMS)]:
+        plt.subplot(2, 5, index+1)
+        plt.plot(day_range, actual_data[index], label='Actual', color = "red")
+        plt.plot(day_range, pred_data[index], label='Prediction', color = "blue")
+        plt.ylim(-20, 40)
+        plt.title(f"{param}")
+        plt.legend(['Actual', 'Prediction'])
+        index += 1
+
     plt.show()

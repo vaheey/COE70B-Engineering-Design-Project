@@ -3,6 +3,7 @@
 #include <math.h>
 #include <float.h>
 #include <time.h>
+#include <string.h>
 
 double calcEuclidianDistance(
   double presentMax, 
@@ -119,28 +120,63 @@ int main() {
   }
 
   double selectedPrevWindow[7][3];
-
   for (int i = 0; i < 7; i++) {
     for (int j = 0; j < 3; j++) {
       selectedPrevWindow[i][j] = windows[indexMinEd][i][j];
     }
   }
 
-  double selMaxSum, selMinSum, selRainSum;
-
-  for (int i = 0; i < 7; i++) {
-    selMaxSum += selectedPrevWindow[i][0];
-    selMinSum += selectedPrevWindow[i][1];
-    selRainSum += selectedPrevWindow[i][2];
+  // Find variation vectors
+  double presentVariationVector[3][6];
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 6; j++) {
+      presentVariationVector[i][j] = CD[j+1][i] - CD[j][i];
+    }
   }
 
-  double selMaxMean = selMaxSum / 7;
-  double selMinMean = selMinSum / 7;
-  double selRainMean = selRainSum / 7;
+  double prevVariationVector[3][6];
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 6; j++) {
+      prevVariationVector[i][j] = selectedPrevWindow[j+1][i] - selectedPrevWindow[j][i];
+    }
+  }
 
-  double predMax = (presentMax + selMaxMean) / 2;
-  double predMin = (presentMin + selMinMean) / 2;
-  double predRain = (presentRain + selRainMean) / 2;
+  double meanPresentVar[3];
+  for (int i = 0; i < 3; i++) {
+    double presentVarSum;
+    for (int j = 0; j < 6; j++) {
+      presentVarSum += presentVariationVector[i][j];
+    }
+    meanPresentVar[i] = presentVarSum / 6;
+  }
+
+  double meanPrevVar[3];
+  for (int i = 0; i < 3; i++) {
+    double prevVarSum;
+    for (int j = 0; j < 6; j++) {
+      prevVarSum += prevVariationVector[i][j];
+    }
+    meanPrevVar[i] = prevVarSum / 6;
+  }
+
+  double meanVariationVector[3];
+  for (int i = 0; i < 3; i++) {
+    meanVariationVector[i] = (meanPresentVar[i] + meanPrevVar[i]) / 2;
+  }
+
+  double previousDay[3];
+  for (int i = 0; i < 3; i++) {
+    previousDay[i] = CD[6][i];
+  }
+
+  // Add mean variation vector values to the previous day
+  for (int i = 0; i < 3; i++) {
+    previousDay[i] += meanVariationVector[i];
+  }
+
+  double predMax = previousDay[0];
+  double predMin = previousDay[1];
+  double predRain = previousDay[2];
 
   printf("Prediction for June 15th 2021\n");
   printf("\tMax Temp | Min Temp | Rainfall\n");

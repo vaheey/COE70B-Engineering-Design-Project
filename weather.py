@@ -66,7 +66,7 @@ def get_mean(arr):
 
 # Predicting any day in 2021
 def forecast_day(day,data_21,data_20):
-    if day < 15 or day > 360:
+    if day < 7 or day > 360:
         return None, None
 
     present_days = data_21.loc[day-7:day-1]
@@ -138,6 +138,10 @@ def forecast_day(day,data_21,data_20):
         prev_day[i] += mean_variation_vector[i]
     pred_arr = prev_day.tolist()
     
+    for i in range(len(pred_arr[5:])):
+        if pred_arr[5+i] < 0:
+            pred_arr[5+i] = 0
+
     actual_data = data_21.loc[day]
     actual_data = actual_data.fillna(0)
     actual_values = actual_data[PARAMS].to_numpy().flatten()

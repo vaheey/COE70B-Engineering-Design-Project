@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+// Reads a CSV file and returns an array of strings
+// containing the values in the specified rows and columns
 void readCSV(
   char result[][50][50], 
   char * filename, 

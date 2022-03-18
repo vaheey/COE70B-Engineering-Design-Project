@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 data_files_2020 = [
-    pd.read_csv("data/2020_data.csv"),
+    pd.read_csv("data/2020_tor_data.csv"),
     pd.read_csv("data/2020_van_data.csv"),
     pd.read_csv("data/2020_mtl_data.csv"),
     pd.read_csv("data/2020_cal_data.csv"),
@@ -30,7 +30,7 @@ data_files_2020 = [
     ]
 
 data_files_2021 = [
-    pd.read_csv("data/2021_data.csv"),
+    pd.read_csv("data/2021_tor_data.csv"),
     pd.read_csv("data/2021_van_data.csv"),
     pd.read_csv("data/2021_mtl_data.csv"),
     pd.read_csv("data/2021_cal_data.csv"),

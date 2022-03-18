@@ -6,6 +6,52 @@
 #include <string.h>
 #include "csv.h"
 
+char presentCSV[20][50] = {
+  "./data/2021_tor_data.csv",
+  "./data/2021_van_data.csv",
+  "./data/2021_mtl_data.csv",
+  "./data/2021_cal_data.csv",
+  "./data/2021_edm_data.csv",
+  "./data/2021_ham_data.csv",
+  "./data/2021_hfx_data.csv",
+  "./data/2021_kel_data.csv",
+  "./data/2021_kit_data.csv",
+  "./data/2021_lon_data.csv",
+  "./data/2021_osh_data.csv",
+  "./data/2021_ott_data.csv",
+  "./data/2021_peg_data.csv",
+  "./data/2021_qbc_data.csv",
+  "./data/2021_reg_data.csv",
+  "./data/2021_sas_data.csv",
+  "./data/2021_stcath_data.csv",
+  "./data/2021_stjn_data.csv",
+  "./data/2021_vic_data.csv",
+  "./data/2021_win_data.csv"
+};
+
+char prevCSV[20][50] = {
+  "./data/2020_tor_data.csv",
+  "./data/2020_van_data.csv",
+  "./data/2020_mtl_data.csv",
+  "./data/2020_cal_data.csv",
+  "./data/2020_edm_data.csv",
+  "./data/2020_ham_data.csv",
+  "./data/2020_hfx_data.csv",
+  "./data/2020_kel_data.csv",
+  "./data/2020_kit_data.csv",
+  "./data/2020_lon_data.csv",
+  "./data/2020_osh_data.csv",
+  "./data/2020_ott_data.csv",
+  "./data/2020_peg_data.csv",
+  "./data/2020_qbc_data.csv",
+  "./data/2020_reg_data.csv",
+  "./data/2020_sas_data.csv",
+  "./data/2020_stcath_data.csv",
+  "./data/2020_stjn_data.csv",
+  "./data/2020_vic_data.csv",
+  "./data/2020_win_data.csv" 
+};
+
 // Calculate the euclidian distance of two arrays
 double calcEuclidianDistance(
   double *presentMeans, 
@@ -170,7 +216,7 @@ void predictWeatherForGivenDay(
 
   // Retrive the actual values for comparision purposes
   char actualValues[1][50][50];
-  readCSV(actualValues, "2021_data.csv", day, day, cols, numParams);
+  readCSV(actualValues, presentCSV, day, day, cols, numParams);
   for (int i = 0; i < numParams; i++)
     actual[i] = atof(actualValues[0][i]);
 }
@@ -190,32 +236,33 @@ int main() {
   // 25 - Snow on Grnd (cm)
   int cols[] = {9, 11, 13, 15, 17, 19, 21, 23, 25};
   int numParams = sizeof(cols) / sizeof(cols[0]);
-  char presentCSV[] = "2021_data.csv";
-  char prevCSV[] = "2020_data.csv";
+  int numLocations = sizeof(presentCSV) / sizeof(presentCSV[0]);
 
-  for (int i = 8; i <= 359; i++) {
-    double prediction[numParams];
-    double actual[numParams];
-    predictWeatherForGivenDay(
-      prediction, 
-      actual, 
-      presentCSV, 
-      prevCSV, 
-      i,
-      cols, 
-      numParams
-    );
-    
-    // Comment out these print statements for a more accurate time measurement
-    printf("\nDay %d\nActual: ", i);
-    for (int j = 0; j < numParams; j++) {
-      printf("%.2lf ", actual[j]);
+  for (int location = 0; location < numLocations; location++) {
+    for (int i = 8; i <= 359; i++) {
+      double prediction[numParams];
+      double actual[numParams];
+      predictWeatherForGivenDay(
+        prediction, 
+        actual, 
+        presentCSV[location], 
+        prevCSV[location], 
+        i,
+        cols, 
+        numParams
+      );
+      
+      // Comment out these print statements for a more accurate time measurement
+      // printf("\nDay %d\nActual: ", i);
+      // for (int j = 0; j < numParams; j++) {
+      //   printf("%.2lf ", actual[j]);
+      // }
+      // printf("\nPrediction: ");
+      // for (int j = 0; j < numParams; j++) {
+      //   printf("%.2lf ", prediction[j]);
+      // }
+      // printf("\n");
     }
-    printf("\nPrediction: ");
-    for (int j = 0; j < numParams; j++) {
-      printf("%.2lf ", prediction[j]);
-    }
-    printf("\n");
   }
   
   t = clock() - t;

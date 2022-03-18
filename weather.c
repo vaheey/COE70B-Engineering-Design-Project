@@ -30,7 +30,7 @@ double min(double *arr, int len) {
 
 // Predicts the weather of a particular day of a year
 void predictWeatherForGivenDay(
-  double *predictions, 
+  double *prediction, 
   double *actual,
   char *presentCSV,
   char *prevCSV, 
@@ -166,7 +166,7 @@ void predictWeatherForGivenDay(
 
   // Assign the final prediction values
   for (int i = 0; i < numParams; i++)
-    predictions[i] = previousDay[i];
+    prediction[i] = previousDay[i];
 
   // Retrive the actual values for comparision purposes
   char actualValues[1][50][50];
@@ -194,10 +194,10 @@ int main() {
   char prevCSV[] = "2020_data.csv";
 
   for (int i = 8; i <= 359; i++) {
-    double predictions[numParams];
+    double prediction[numParams];
     double actual[numParams];
     predictWeatherForGivenDay(
-      predictions, 
+      prediction, 
       actual, 
       presentCSV, 
       prevCSV, 
@@ -213,7 +213,7 @@ int main() {
     }
     printf("\nPrediction: ");
     for (int j = 0; j < numParams; j++) {
-      printf("%.2lf ", predictions[j]);
+      printf("%.2lf ", prediction[j]);
     }
     printf("\n");
   }

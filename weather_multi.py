@@ -5,6 +5,7 @@ from pprint import pprint
 import time
 import matplotlib.pyplot as plt
 import numpy as np
+import datetime
 
 data_files_2020 = [
     pd.read_csv("data/2020_tor_data.csv"),
@@ -52,6 +53,8 @@ data_files_2021 = [
     pd.read_csv("data/2021_win_data.csv")
 ]
 
+
+
 PARAMS = [
     "Max Temp (°C)",
     "Min Temp (°C)",
@@ -64,6 +67,26 @@ PARAMS = [
     "Snow on Grnd (cm)",
 ]
 
+PARAMS_DATE = [
+    "Date/Time",
+    "Max Temp (°C)",
+    "Min Temp (°C)",
+    "Mean Temp (°C)",
+    "Heat Deg Days (°C)",
+    "Cool Deg Days (°C)",
+    "Total Rain (mm)",
+    "Total Snow (cm)",
+    "Total Precip (mm)",
+    "Snow on Grnd (cm)",
+]
+
+DATE_ENUM = "Date/Time"
+
+pred_tor_2020 = pd.read_csv("temp_data/2020_tor_data.csv")[PARAMS_DATE]
+pred_tor_2021 = pd.read_csv("temp_data/2021_tor_data.csv")[PARAMS_DATE]
+pred_tor_2022 = pd.read_csv("temp_data/2022_tor_data.csv")[PARAMS_DATE]
+temp_tor_2022 = pd.read_csv("temp_data/2022_tor_data.csv")[PARAMS_DATE]
+
 NUM_OF_PARAMS = len(PARAMS)
 
 def get_mean(arr):
@@ -71,16 +94,16 @@ def get_mean(arr):
 
 # Predicting any day in 2021
 def forecast_day(day,data_21,data_20):
-    if day < 7 or day > 360:
-        return None, None
+    # if day < 7 or day > 359:
+    #     return None, None
 
-    present_days = data_21.loc[day-7:day-1]
-    present_days = present_days[PARAMS]
+    # present_days = data_21.loc[day-7:day-1]
+    present_days = data_21[PARAMS]
     present_days = present_days.fillna(0)
     CD = present_days.to_numpy()
 
-    prev_days = data_20.loc[day-7:day+6]
-    prev_days = prev_days[PARAMS]
+    # prev_days = data_20.loc[day-7:day+6]
+    prev_days = data_20[PARAMS]
 
     prev_days = prev_days.fillna(0)
     PD = prev_days.to_numpy()
@@ -147,48 +170,59 @@ def forecast_day(day,data_21,data_20):
         if pred_arr[5+i] < 0:
             pred_arr[5+i] = 0
 
-    actual_data = data_21.loc[day]
-    actual_data = actual_data.fillna(0)
-    actual_values = actual_data[PARAMS].to_numpy().flatten()
+    # actual_data = data_21.loc[day]
+    # actual_data = actual_data.fillna(0)
+    # actual_values = actual_data[PARAMS].to_numpy().flatten()
+    pred_arr.insert(0, day)
 
-    return actual_values, pred_arr
+    return pred_arr
 
 if __name__ == "__main__":
     t0 = time.time()
-    day_range = np.arange(0, 365)
-    actual_list = [[] for i in range(20)]
-    pred_list = [[] for i in range(20)]
 
+    pred_main = pd.concat([pred_tor_2020, pred_tor_2021], ignore_index=True)
+    pred_main = pd.concat([pred_main, pred_tor_2022.loc[0:7]], ignore_index=True)
 
-    for day in day_range:
-        for i in range(len(pred_list)):
-            temp_actual, temp_pred = forecast_day(day,data_files_2021[i],data_files_2020[i])
+    curr_date = datetime.date(2022, 1, 9)
 
-            if temp_pred:
-                actual_list[i].append(list(temp_actual))
-                pred_list[i].append(list(temp_pred))
+    for i in range(365):
+        day_index = len(pred_main) - 1
+        prev_index = day_index - 365
+        seven_day_data = pred_main.loc[day_index-6:day_index]
+        prev_day_data = pred_main.loc[prev_index-6:prev_index+7]
 
-            else:
-                actual_list[i].append([0] * NUM_OF_PARAMS)
-                pred_list[i].append([0] * NUM_OF_PARAMS)
+        # print()
+        temp_pred = forecast_day(curr_date.isoformat(), seven_day_data, prev_day_data)
+        temp_pred = np.array(temp_pred, dtype=object)
+        temp_df = pd.DataFrame([temp_pred], columns=PARAMS_DATE)
+        pred_main = pd.concat([pred_main, temp_df], ignore_index=True)
+
+        curr_date += datetime.timedelta(days=1)
 
     print(f"\nTotal time: {time.time() - t0}")
 
-    toronto_actual_data = np.transpose(actual_list[0])
-    toronto_pred_data = np.transpose(pred_list[0])
 
 
-    plt.figure()
-    plt.subplot(1, 3, 1)
-    plt.gcf().set_size_inches(20,12)
+    # Plotting
+    temp_start_date = datetime.date(2022, 1, 1)
+    temp_end_date = datetime.date(2022, 1, 31)
 
-    index = 0
-    for param in PARAMS:
-        plt.subplot(2, 5, index+1)
-        plt.plot(day_range, toronto_actual_data[index], label='Toronto Actual', color = "red")
-        plt.plot(day_range, toronto_pred_data[index], label='Toronto Prediction', color = "blue")
-        plt.ylim(-20, 40)
-        plt.title(f"{param}")
-        plt.legend(['Toronto Actual', 'Toronto Prediction'])
-        index += 1
+    temp_start_index = pred_main.index[pred_main[PARAMS_DATE[0]] == temp_start_date.isoformat()][0]
+    temp_end_index = pred_main.index[pred_main[PARAMS_DATE[0]] == temp_end_date.isoformat()][0]
+
+    temp_data = pred_main.loc[temp_start_index:temp_end_index]
+
+    temp_actual_data = temp_tor_2022[PARAMS]
+    temp_actual_data = temp_actual_data.loc[0:30]
+
+    n = np.arange(0, len(temp_data))
+
+    pprint(temp_actual_data[PARAMS[8]])
+
+    temp_mean = np.transpose(temp_data[PARAMS[8]])
+    temp_actual_mean = np.transpose(temp_actual_data[PARAMS[8]])
+
+    plt.plot(n, temp_mean, color='blue')
+    plt.plot(n, temp_actual_mean, color='red')
+
     plt.show()

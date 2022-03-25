@@ -188,7 +188,7 @@ if __name__ == "__main__":
     for i in range(365):
         day_index = len(pred_main) - 1
         prev_index = day_index - 365
-        seven_day_data = pred_main.loc[day_index-7:day_index]
+        seven_day_data = pred_main.loc[day_index-6:day_index]
         prev_day_data = pred_main.loc[prev_index-6:prev_index+7]
 
         # print()

@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <float.h>
 #include <time.h>
 #include <string.h>
 #include "csv.h"
+#include "utils.h"
 
-char presentCSV[20][50] = {
+char presentCSV[][50] = {
   "./data/2021_tor_data.csv",
   "./data/2021_van_data.csv",
   "./data/2021_mtl_data.csv",
@@ -29,7 +28,7 @@ char presentCSV[20][50] = {
   "./data/2021_win_data.csv"
 };
 
-char prevCSV[20][50] = {
+char prevCSV[][50] = {
   "./data/2020_tor_data.csv",
   "./data/2020_van_data.csv",
   "./data/2020_mtl_data.csv",
@@ -52,45 +51,23 @@ char prevCSV[20][50] = {
   "./data/2020_win_data.csv" 
 };
 
-// Calculate the euclidian distance of two arrays
-double calcEuclidianDistance(
-  double *presentMeans, 
-  double *prevMeans, 
-  int numPresentMeans
-) {
-  double euclidianDistance = 0;
-  for (int i = 0; i < numPresentMeans; i++) {
-    euclidianDistance += pow(presentMeans[i] - prevMeans[i], 2);
-  }
-  return sqrt(euclidianDistance);
-}
-
-// Determine the minimum value from an array
-double min(double *arr, int len) {
-  double minVal = DBL_MAX;
-  for (int i = 0; i < len; i++)
-    if (arr[i] < minVal)
-      minVal = arr[i];
-  return minVal;
-}
-
 // Predicts the weather of a particular day of a year
 void predictWeatherForGivenDay(
   double *prediction, 
   double *actual,
-  char *presentCSV,
-  char *prevCSV, 
+  char presentData[][50][50],
+  char prevData[][50][50], 
   int day, 
   int *cols, 
   int numParams
 ) {
   // Get current data for the past 7 days
   char CD[7][50][50];
-  readCSV(CD, presentCSV, day - 7, day - 1, cols, numParams);
+  filterMatrix(presentData, CD, day - 7, day - 1, cols, numParams);
 
   // Get previous data (1 year old) for a 14 day period
   char PD[14][50][50];
-  readCSV(PD, prevCSV, day - 7, day + 6, cols, numParams);
+  filterMatrix(prevData, PD, day - 7, day + 6, cols, numParams);
 
   // 8 sliding windows based on previous data, 7 days per window
   double windows[8][7][numParams];
@@ -216,7 +193,7 @@ void predictWeatherForGivenDay(
 
   // Retrive the actual values for comparision purposes
   char actualValues[1][50][50];
-  readCSV(actualValues, presentCSV, day, day, cols, numParams);
+  filterMatrix(presentData, actualValues, day, day, cols, numParams);
   for (int i = 0; i < numParams; i++)
     actual[i] = atof(actualValues[0][i]);
 }
@@ -239,14 +216,20 @@ int main() {
   int numLocations = sizeof(presentCSV) / sizeof(presentCSV[0]);
 
   for (int location = 0; location < numLocations; location++) {
+    // Get data from CSV files
+    char presentData[400][50][50];
+    char prevData[400][50][50];
+    readCSV(presentData, presentCSV[location]);
+    readCSV(prevData, prevCSV[location]);
+
     for (int i = 8; i <= 359; i++) {
       double prediction[numParams];
       double actual[numParams];
       predictWeatherForGivenDay(
         prediction, 
         actual, 
-        presentCSV[location], 
-        prevCSV[location], 
+        presentData, 
+        prevData, 
         i,
         cols, 
         numParams

@@ -3,11 +3,7 @@
 
 void readCSV(
   char result[][50][50], 
-  char * filename, 
-  int startRow, 
-  int endRow, 
-  int *cols,
-  int numCols
+  char * filename
 );
 
 #endif

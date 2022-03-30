@@ -63,6 +63,12 @@ PARAMS = [
     "Total Precip (mm)",
     "Snow on Grnd (cm)",
 ]
+s1time = 0
+s2time = 0
+s3time = 0
+s4time = 0
+s5time = 0
+s6time = 0
 
 NUM_OF_PARAMS = len(PARAMS)
 
@@ -74,22 +80,36 @@ def forecast_day(day,data_21,data_20):
     if day < 7 or day > 360:
         return None, None
 
+    s1 = time.time()
     present_days = data_21.loc[day-7:day-1]
     present_days = present_days[PARAMS]
     present_days = present_days.fillna(0)
     CD = present_days.to_numpy()
+    s1e = time.time()
+    global s1time
+    s1time += s1e - s1
 
+    s2 = time.time()
     prev_days = data_20.loc[day-7:day+6]
     prev_days = prev_days[PARAMS]
 
     prev_days = prev_days.fillna(0)
     PD = prev_days.to_numpy()
+    s2e = time.time()
+    global s2time
+    s2time += s2e - s2
 
+
+    s3 = time.time()
     windows = []
     for i in range(len(PD) - 6):
         windows.append(PD[i: i+7])
+    s3e = time.time()
+    global s3time
+    s3time += s3e-s3
 
     # calculating means for present year 7 days
+    s4 = time.time()
     present_sums = [0] * NUM_OF_PARAMS
     for line in CD:
         for i in range(len(line)):
@@ -107,11 +127,19 @@ def forecast_day(day,data_21,data_20):
 
         euclid_distance = sum([(present_means[i] - prev_means[i]) ** 2 for i in range(len(present_means))])
         ed_list.append(euclid_distance)
+    s4e = time.time()
+    global s4time
+    s4time += s4e-s4
 
+    s5 = time.time()
     min_ed = min(ed_list)
     index_min_ed = indexOf(ed_list, min_ed)
     selected_prev_window = windows[index_min_ed]
+    s5e = time.time()
+    global s5time
+    s5time += s5e - s5
 
+    s6 = time.time()
     present_variation_vector = []
     for i in range(len(CD[0])):
         vector = []
@@ -150,6 +178,9 @@ def forecast_day(day,data_21,data_20):
     actual_data = data_21.loc[day]
     actual_data = actual_data.fillna(0)
     actual_values = actual_data[PARAMS].to_numpy().flatten()
+    s6e = time.time()
+    global s6time
+    s6time += s6e - s6
 
     return actual_values, pred_arr
 
@@ -173,6 +204,13 @@ if __name__ == "__main__":
                 pred_list[i].append([0] * NUM_OF_PARAMS)
 
     print(f"\nTotal time: {time.time() - t0}")
+    print(f"\n Step 1 done in:{s1time}")
+    print(f"\n Step 2 done in:{s2time}")
+    print(f"\n Step 3 done in:{s3time}")
+    print(f"\n Step 4 done in:{s4time}")
+    print(f"\n Step 5 done in:{s5time}")
+    print(f"\n Step 6 done in:{s6time}")
+
 
     toronto_actual_data = np.transpose(actual_list[0])
     toronto_pred_data = np.transpose(pred_list[0])

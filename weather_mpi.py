@@ -9,8 +9,8 @@ rank = comm.Get_rank()
 size = comm.Get_size()
 
 if rank == 0:
-    data_20 = pd.read_csv("2020_data.csv")
-    data_21 = pd.read_csv("2021_data.csv")
+    data_20 = pd.read_csv("data/2020_tor_data.csv")
+    data_21 = pd.read_csv("data/2021_tor_data.csv")
     data_21.head()
     present_days = data_21[data_21["Month"] == 6]
     prev_days = data_20[data_20["Month"] == 6]    
@@ -31,12 +31,10 @@ else:
     present_days = present_days[(present_days["Day"] < 15 + rank) & (present_days["Day"] >= 8 + rank )]
     present_days = present_days[["Max Temp (°C)", "Min Temp (°C)", "Total Rain (mm)"]]
     CD = present_days.to_numpy()
-    # CD = np.asmatrix(CD)
 
     prev_days = prev_days[(prev_days["Day"] < 15 + rank) & (prev_days["Day"] >= 1 + rank)]
     prev_days = prev_days[["Max Temp (°C)", "Min Temp (°C)", "Total Rain (mm)"]]
     PD = prev_days.to_numpy()
-    # PD = np.asmatrix(PD)
 
     w_dct = {}
 
@@ -74,20 +72,41 @@ else:
 
     selected_prev_window = w_dct.get(f"W{index_min_ed+1}")
 
-    sel_max_sum = sel_min_sum = sel_rain_sum = 0
+    
+    present_variation_vector = []
+    for i in range(len(CD[0])):
+        vector = []
+        for j in range(len(CD)-1):
+            vector.append(CD[j+1][i] - CD[j][i])
+        present_variation_vector.append(vector)
 
-    for line in selected_prev_window:
-        sel_max_sum += line[0]
-        sel_min_sum += line[1]
-        sel_rain_sum += line[2]
+    prev_variation_vector = []
+    for i in range(len(selected_prev_window[0])):
+            vector = []
+            for j in range(len(selected_prev_window)-1):
+                vector.append(selected_prev_window[j+1][i] - selected_prev_window[j][i])
+            prev_variation_vector.append(vector)
+    
+    mean_present_var = []
+    for i in range(len(present_variation_vector)):
+        mean_present_var.append(sum(present_variation_vector[i]) / len(present_variation_vector[i]))
 
-    sel_max_mean = sel_max_sum / 7
-    sel_min_mean = sel_min_sum / 7
-    sel_rain_mean = sel_rain_sum / 7
+    mean_prev_var = []
+    for i in range(len(prev_variation_vector)):
+        mean_prev_var.append(sum(prev_variation_vector[i]) / len(prev_variation_vector[i]))
 
-    pred_max = (present_max + sel_max_mean) / 2
-    pred_min = (present_min + sel_min_mean) / 2
-    pred_rain = (present_rain + sel_rain_mean) / 2
+    mean_variation_vector = []
+    for i in range(len(mean_present_var)):
+        mean_variation_vector.append((mean_present_var[i] + mean_prev_var[i]) / 2)
+    
+    prev_day = CD[-1]
+    for i in range(len(prev_day)):
+        prev_day[i] += mean_variation_vector[i]
+    pred_arr = prev_day.tolist()
+
+    pred_max = pred_arr[0]
+    pred_min = pred_arr[1]
+    pred_rain = pred_arr[2]
 
     actual_data = data_21[(data_21["Month"] == 6) & (data_21["Day"] == 15 + rank)]
     actual_values = actual_data[["Max Temp (°C)", "Min Temp (°C)", "Total Rain (mm)"]].to_numpy().flatten()
